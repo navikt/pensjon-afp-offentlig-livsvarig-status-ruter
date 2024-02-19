@@ -1,0 +1,31 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+
+metadata:
+  labels:
+    team: pensjon-saksbehandling
+  name: pensjon-afp-offentlig-livsvarig-status-ruter
+  namespace: pensjon-saksbehandling
+spec:
+  ingresses:
+    - https://pensjon-afp-offentlig-livsvarig-status-ruter.intern.dev.nav.no
+  image: {{image}}
+  port: 8080
+  replicas:
+    max: 2
+    min: 2
+  liveness:
+    path: "/actuator/health/liveness"
+    initialDelay: 10
+  readiness:
+    path: "/actuator/health/readiness"
+    initialDelay: 10
+  startup:
+    path: "/actuator/health/readiness"
+    initialDelay: 10
+    failureThreshold: 100
+    periodSeconds: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
