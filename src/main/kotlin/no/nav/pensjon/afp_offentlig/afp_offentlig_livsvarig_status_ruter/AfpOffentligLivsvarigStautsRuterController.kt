@@ -11,7 +11,7 @@ import java.time.LocalDate
 class AfpOffentligLivsvarigStautsRuterController(
 ) {
 
-    @PostMapping("/hent")
+    @PostMapping("/status")
     fun hentAfpOffentligStatus(@RequestBody request: HentStatusRequest): HentStatusResponse {
         return HentStatusResponse(null,null,null)
     }
