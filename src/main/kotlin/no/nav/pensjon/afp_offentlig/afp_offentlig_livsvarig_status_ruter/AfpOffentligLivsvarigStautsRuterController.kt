@@ -9,12 +9,18 @@ import java.time.LocalDate
 @RestController
 @RequestMapping("/api/afp-offentlig-status")
 class AfpOffentligLivsvarigStautsRuterController(
+    private val service: AfpOffentligLivsvarigService
 ) {
 
     @PostMapping("/status")
     fun hentAfpOffentligStatus(@RequestBody request: HentStatusRequest): HentStatusResponse {
-        return HentStatusResponse(null,null,null)
+        service.hentAfpOffentligLivsvarigStatus(
+            fnr = request.fnr,
+            onsketVirkningtidspunkt = request.onsketVirkningtidspunkt
+        )
+        return HentStatusResponse(null, SoknadDto(LocalDate.now()),null)
     }
+
     data class HentStatusRequest(
         val fnr: String,
         val onsketVirkningtidspunkt: LocalDate,
