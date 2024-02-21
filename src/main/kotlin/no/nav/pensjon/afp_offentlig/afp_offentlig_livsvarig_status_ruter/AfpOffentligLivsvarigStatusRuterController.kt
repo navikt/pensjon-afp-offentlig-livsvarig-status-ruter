@@ -8,17 +8,16 @@ import java.time.LocalDate
 
 @RestController
 @RequestMapping("/api/afp-offentlig-status")
-class AfpOffentligLivsvarigStautsRuterController(
+class AfpOffentligLivsvarigStatusRuterController(
     private val service: AfpOffentligLivsvarigService
 ) {
 
     @PostMapping("/status")
-    fun hentAfpOffentligStatus(@RequestBody request: HentStatusRequest): HentStatusResponse {
-        service.hentAfpOffentligLivsvarigStatus(
+    suspend fun hentAfpOffentligStatus(@RequestBody request: HentStatusRequest): AfpOffentligLivsvarigService.HentStatusResponse {
+        return service.hentAfpOffentligLivsvarigStatus(
             fnr = request.fnr,
             onsketVirkningtidspunkt = request.onsketVirkningtidspunkt
         )
-        return HentStatusResponse(null, SoknadDto(LocalDate.now()),null)
     }
 
     data class HentStatusRequest(
@@ -27,26 +26,5 @@ class AfpOffentligLivsvarigStautsRuterController(
         val hjemmel: String,
         val tema: String,
         val type: String,
-    )
-    data class HentStatusResponse(
-        val innvilget: InnvilgetDto?,
-        val soknad: SoknadDto?,
-        val manglendeApi: ManglendeApiDto?,
-    )
-
-    data class InnvilgetDto(
-        val belop: Int,
-        val tpNummer: Int,
-        val startdato: LocalDate,
-        val sluttdato: LocalDate?,
-        val sistRegulert: LocalDate,
-    )
-
-    data class SoknadDto(
-        val onsketVirkningsdato: LocalDate,
-    )
-
-    data class ManglendeApiDto(
-        val onsketVirkningsdato: LocalDate
     )
 }

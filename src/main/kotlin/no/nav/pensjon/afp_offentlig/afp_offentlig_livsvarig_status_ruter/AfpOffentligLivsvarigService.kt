@@ -5,54 +5,68 @@ import java.time.LocalDate
 
 @Service
 class AfpOffentligLivsvarigService(
-    private val client: AfpOffentligLivsvarigClient
+    private val sisteOrdningClient: SisteOrdningClient,
+    private val clientMap: Map<Int, AfpOffentligLivsvarigClient>,
 ) {
+    suspend fun hentAfpOffentligLivsvarigStatus(fnr: String, onsketVirkningtidspunkt: LocalDate): HentStatusResponse {
+        val sisteOrdning: Int? = sisteOrdningClient.soekSisteOrdning(fnr)
 
-    companion object {
-        //TODO: application properties
-        private const val SPK = "3010"
-        private const val KLP = "3200"
-        private const val OPF = "3820"
-        private const val GABLER = "4160"
+        return if (sisteOrdning != null) {
+            val client = clientMap[sisteOrdning]
+            if (client != null) {
+                val hentAfpStatus = client
+                    .hentAfpStatus(fnr, onsketVirkningtidspunkt, sisteOrdning)
 
-    }
+                when (hentAfpStatus.statusAfp) {
+                    "SOKT" -> return HentStatusResponse(
+                        soknad = SoknadDto(hentAfpStatus.virkningsdato)
+                    )
 
-    fun hentAfpOffentligLivsvarigStatus(fnr: String, onsketVirkningtidspunkt: LocalDate) {
+                    "INNVILGET" -> return HentStatusResponse(
+                        innvilget = InnvilgetDto(
+                            belop = hentAfpStatus.belop,
+                            tpNummer = hentAfpStatus.tpId.toInt(),
+                            startdato = hentAfpStatus.virkningsdato,
+                            sistRegulert = hentAfpStatus.datoSistRegulert,
+                        )
+                    )
 
-        when (val sisteOrdning = client.hentSisteOrdning(fnr)) {
-            SPK -> {
-                client.hentAfpStatusSPK(
-                    fnr = fnr,
-                    uttaksdato = onsketVirkningtidspunkt,
-                    sisteOrdning = sisteOrdning
+                    "AVSLAG", "IKKE_SOKT" -> return HentStatusResponse()
+                    else -> throw IllegalArgumentException("Fikk ukjent status ${hentAfpStatus.statusAfp}")
+                }
+            } else {
+                HentStatusResponse(
+                    manglendeApi = ManglendeApiDto(),
                 )
             }
-            KLP -> {
-                client.hentAfpStatusKLP(
-                    fnr = fnr,
-                    uttaksdato = onsketVirkningtidspunkt,
-                    sisteOrdning = sisteOrdning
-                )
-            }
-            OPF -> {
-                client.hentAfpStatusOPF(
-                    fnr = fnr,
-                    uttaksdato = onsketVirkningtidspunkt,
-                    sisteOrdning = sisteOrdning
-                )
-            }
-            GABLER -> {
-                client.hentAfpStatusGABLER(
-                    fnr = fnr,
-                    uttaksdato = onsketVirkningtidspunkt,
-                    sisteOrdning = sisteOrdning
-                )
-            }
-
-            else -> null
+        } else {
+            HentStatusResponse(
+                manglerSisteOrdning = ManglerSisteOrdningDto()
+            )
         }
-
-
     }
+
+    data class HentStatusResponse(
+        val innvilget: InnvilgetDto? = null,
+        val soknad: SoknadDto? = null,
+        val manglendeApi: ManglendeApiDto? = null,
+        val manglerSisteOrdning: ManglerSisteOrdningDto? = null,
+    )
+
+
+    data class InnvilgetDto(
+        val belop: Int,
+        val tpNummer: Int,
+        val startdato: LocalDate,
+        val sistRegulert: LocalDate,
+    )
+
+    data class SoknadDto(
+        val onsketVirkningsdato: LocalDate,
+    )
+
+    class ManglendeApiDto
+    class ManglerSisteOrdningDto
 
 }
+
