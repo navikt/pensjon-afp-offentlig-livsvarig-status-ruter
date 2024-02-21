@@ -17,9 +17,9 @@ class SisteOrdningClient(
         .baseUrl(baseUrl)
         .build()
 
-    suspend fun soekSisteOrdning(fnr: String): Int? {
+    suspend fun soekSisteOrdning(fnr: String): Int? =
         try {
-            return webClient.post()
+            webClient.post()
                 .uri("/soek")
                 .bodyValue(SisteOrdningSoekRequest(fnr = fnr))
                 .retrieve()
@@ -27,12 +27,11 @@ class SisteOrdningClient(
                 .tpnr
         } catch (e: WebClientResponseException) {
             if (e.statusCode.isSameCodeAs(HttpStatus.NOT_FOUND)) {
-                return null
+                null
             } else {
                 throw e
             }
         }
-    }
 
     data class SisteOrdningSoekRequest(
         val fnr: String,
