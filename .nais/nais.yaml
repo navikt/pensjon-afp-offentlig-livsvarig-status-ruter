@@ -14,6 +14,10 @@ spec:
   replicas:
     max: 2
     min: 2
+  accessPolicy:
+    outbound:
+      rules:
+        - application: "pensjon-afp-offentlig-mock"
   liveness:
     path: "/actuator/health/liveness"
     initialDelay: 10
