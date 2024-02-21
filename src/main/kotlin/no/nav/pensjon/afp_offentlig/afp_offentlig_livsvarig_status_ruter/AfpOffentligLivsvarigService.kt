@@ -19,7 +19,10 @@ class AfpOffentligLivsvarigService(
 
                 when (hentAfpStatus.statusAfp) {
                     "SOKT" -> return HentStatusResponse(
-                        soknad = SoknadDto(hentAfpStatus.virkningsdato)
+                        soknad = SoknadDto(
+                            hentAfpStatus.virkningsdato,
+                            tpNummer = hentAfpStatus.tpId.toInt(),
+                        ),
                     )
 
                     "INNVILGET" -> return HentStatusResponse(
@@ -36,7 +39,9 @@ class AfpOffentligLivsvarigService(
                 }
             } else {
                 HentStatusResponse(
-                    manglendeApi = ManglendeApiDto(),
+                    manglendeApi = ManglendeApiDto(
+                        tpNummer = sisteOrdning,
+                    ),
                 )
             }
         } else {
@@ -63,10 +68,14 @@ class AfpOffentligLivsvarigService(
 
     data class SoknadDto(
         val onsketVirkningsdato: LocalDate,
+        val tpNummer: Int,
     )
 
-    class ManglendeApiDto
-    class ManglerSisteOrdningDto
+    @Suppress("unused")
+    class ManglendeApiDto(
+        val tpNummer: Int,
+    )
 
+    class ManglerSisteOrdningDto
 }
 
