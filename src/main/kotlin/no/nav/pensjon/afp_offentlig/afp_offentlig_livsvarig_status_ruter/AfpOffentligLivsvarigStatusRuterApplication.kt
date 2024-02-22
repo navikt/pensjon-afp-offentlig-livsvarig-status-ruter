@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class AfpOffentligLivsvarigStatusRuterApplication
 
 fun main(args: Array<String>) {
-	runApplication<AfpOffentligLivsvarigStatusRuterApplication>(*args)
+    runApplication<AfpOffentligLivsvarigStatusRuterApplication>(*args)
 }
