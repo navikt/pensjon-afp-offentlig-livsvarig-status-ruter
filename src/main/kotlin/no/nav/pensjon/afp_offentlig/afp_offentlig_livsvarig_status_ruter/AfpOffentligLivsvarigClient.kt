@@ -3,7 +3,6 @@ package no.nav.pensjon.afp_offentlig.afp_offentlig_livsvarig_status_ruter
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 import java.time.LocalDate
-import java.util.*
 
 class AfpOffentligLivsvarigClient(
     webClientBuilder: WebClient.Builder,
@@ -11,14 +10,14 @@ class AfpOffentligLivsvarigClient(
 ) {
     private val webClient: WebClient = webClientBuilder.baseUrl(baseUrl).build()
 
-    suspend fun hentAfpStatus(fnr: String, uttaksdato: LocalDate, tpnummer: Int) =
+    suspend fun hentAfpStatus(xRequestId: String, fnr: String, uttaksdato: LocalDate, tpnummer: Int) =
         webClient.get()
             .uri {
                 it.path("/hentAfpStatus/{fnr}")
                     .queryParam("uttaksdato", uttaksdato)
                     .build(fnr)
             }
-            .header("X-CORRELATION-ID", UUID.randomUUID().toString())
+            .header("X-CORRELATION-ID", xRequestId)
             .header("X-TPID", tpnummer.toString())
             .retrieve()
             .awaitBody<HentAfpStatusResponse>()

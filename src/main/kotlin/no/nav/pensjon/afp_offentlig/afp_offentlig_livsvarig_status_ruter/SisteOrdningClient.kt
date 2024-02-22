@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.reactive.function.client.awaitBody
+import java.util.*
 
 @Component
 class SisteOrdningClient(
@@ -17,10 +18,11 @@ class SisteOrdningClient(
         .baseUrl(baseUrl)
         .build()
 
-    suspend fun soekSisteOrdning(fnr: String): Int? =
+    suspend fun soekSisteOrdning(xRequestId: String, fnr: String): Int? =
         try {
             webClient.post()
                 .uri("/soek")
+                .header("X-CORRELATION-ID", xRequestId)
                 .bodyValue(SisteOrdningSoekRequest(fnr = fnr))
                 .retrieve()
                 .awaitBody<SisteOrdningSoekResponse>()

@@ -8,14 +8,19 @@ class AfpOffentligLivsvarigService(
     private val sisteOrdningClient: SisteOrdningClient,
     private val clientMap: Map<Int, AfpOffentligLivsvarigClient>,
 ) {
-    suspend fun hentAfpOffentligLivsvarigStatus(fnr: String, onsketVirkningtidspunkt: LocalDate): HentStatusResponse {
-        val sisteOrdning: Int? = sisteOrdningClient.soekSisteOrdning(fnr)
+    suspend fun hentAfpOffentligLivsvarigStatus(xRequestId: String, fnr: String, onsketVirkningtidspunkt: LocalDate): HentStatusResponse {
+        val sisteOrdning: Int? = sisteOrdningClient.soekSisteOrdning(xRequestId = xRequestId, fnr = fnr)
 
         return if (sisteOrdning != null) {
             val client = clientMap[sisteOrdning]
             if (client != null) {
                 val hentAfpStatus = client
-                    .hentAfpStatus(fnr, onsketVirkningtidspunkt, sisteOrdning)
+                    .hentAfpStatus(
+                        xRequestId = xRequestId,
+                        fnr = fnr,
+                        uttaksdato = onsketVirkningtidspunkt,
+                        tpnummer = sisteOrdning,
+                    )
 
                 when (hentAfpStatus.statusAfp) {
                     "SOKT" -> return HentStatusResponse(
