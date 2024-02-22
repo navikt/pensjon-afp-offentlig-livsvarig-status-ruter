@@ -1,0 +1,8 @@
+app:
+  name: pensjon-afp-offentlig-livsvarig-status-ruter
+  ingress: https://pensjon-afp-offentlig-livsvarig-status-ruter.intern.dev.nav.no
+
+env:
+  name: q2
+mock:
+  name: pensjon-afp-offentlig-mock-q2

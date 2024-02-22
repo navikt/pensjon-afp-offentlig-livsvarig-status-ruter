@@ -4,11 +4,11 @@ kind: Application
 metadata:
   labels:
     team: pensjon-saksbehandling
-  name: pensjon-afp-offentlig-livsvarig-status-ruter
+  name: "{{app.name}}"
   namespace: pensjon-saksbehandling
 spec:
   ingresses:
-    - https://pensjon-afp-offentlig-livsvarig-status-ruter.intern.dev.nav.no
+    - "{{app.ingress}}"
   image: {{image}}
   port: 8080
   replicas:
@@ -17,7 +17,7 @@ spec:
   accessPolicy:
     outbound:
       rules:
-        - application: "pensjon-afp-offentlig-mock"
+        - application: "{{mock.name}}"
   liveness:
     path: "/actuator/health/liveness"
     initialDelay: 10
@@ -35,4 +35,4 @@ spec:
       memory: 256Mi
   env:
     - name: "SPRING_PROFILES_ACTIVE"
-      value: "q2"
+      value: "{{env.name}}"

@@ -4,12 +4,14 @@ on:
     branches:
       - main
 jobs:
-  build_and_deploy:
-    name: Build, push and deploy
+  build:
+    name: Build and push image
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
+    outputs:
+      image: ${{ steps.docker-build-push.outputs.image }}
     steps:
       - uses: actions/checkout@v4
 
@@ -31,9 +33,25 @@ jobs:
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
 
-      - name: Deploy to NAIS
-        uses: nais/deploy/actions/deploy@v2
+  deploy:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    if: github.ref == 'refs/heads/main'
+    needs: [build]
+    runs-on: 'ubuntu-latest'
+
+    strategy:
+      matrix:
+        include:
+          - vars: .nais/vars-dev-q2.yaml
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        name: 'Deploy to NAIS'
         env:
-          CLUSTER: dev-gcp
           RESOURCE: .nais/nais.yaml
-          VAR: image=${{ steps.docker-build-push.outputs.image }}
+          CLUSTER: dev-gcp
+          IMAGE: "${{ needs.build.outputs.image }}"
+          VARS: ${{matrix.vars}}
