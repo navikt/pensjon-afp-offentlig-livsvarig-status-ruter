@@ -20,17 +20,17 @@ class AfpOffentligLivsvarigService(
                 when (hentAfpStatus.statusAfp) {
                     "SOKT" -> return HentStatusResponse(
                         soknad = SoknadDto(
-                            hentAfpStatus.virkningsdato,
-                            tpNummer = hentAfpStatus.tpId.toInt(),
+                            hentAfpStatus.virkningsdato ?: throw IllegalArgumentException("Svar fra ordning mangler 'virkningsdato' for afp offentlig søknad"),
+                            tpNummer = hentAfpStatus.tpId?.toInt() ?: throw IllegalArgumentException("Svar fra ordning mangler 'tpId' for afp offentlig søknad"),
                         ),
                     )
 
                     "INNVILGET" -> return HentStatusResponse(
                         innvilget = InnvilgetDto(
-                            belop = hentAfpStatus.belop,
-                            tpNummer = hentAfpStatus.tpId.toInt(),
-                            startdato = hentAfpStatus.virkningsdato,
-                            sistRegulert = hentAfpStatus.datoSistRegulert,
+                            belop = hentAfpStatus.belop ?: throw IllegalArgumentException("Svar fra ordning mangler 'belop' for innvilget afp offentlig"),
+                            tpNummer = hentAfpStatus.tpId?.toInt() ?: throw IllegalArgumentException("Svar fra ordning mangler 'tpId' for innvilget afp offentlig") ,
+                            startdato = hentAfpStatus.virkningsdato ?: throw IllegalArgumentException("Svar fra ordning mangler 'virkningsdato' for innvilget afp offentlig"),
+                            sistRegulert = hentAfpStatus.datoSistRegulert ?: throw IllegalArgumentException("Svar fra ordning mangler 'datoSistRegulert' for innvilget afp offentlig"),
                         )
                     )
 

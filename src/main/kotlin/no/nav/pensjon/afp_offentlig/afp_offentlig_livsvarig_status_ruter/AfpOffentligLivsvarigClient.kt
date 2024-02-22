@@ -28,11 +28,11 @@ class AfpOffentligLivsvarigClient(
     }
 
     data class HentAfpStatusResponse(
-        val tpId: String,
-        val fnr: String,
-        val statusAfp: String,
-        val virkningsdato: LocalDate,
-        val belop: Int,
-        val datoSistRegulert: LocalDate,
+        val tpId: String?,
+        val fnr: String?,
+        val statusAfp: String?,
+        val virkningsdato: LocalDate?,
+        val belop: Int?,
+        val datoSistRegulert: LocalDate?,
     )
 }
