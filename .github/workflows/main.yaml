@@ -44,6 +44,8 @@ jobs:
     strategy:
       matrix:
         include:
+          - vars: .nais/vars-dev-q1.yaml
+
           - vars: .nais/vars-dev-q2.yaml
 
     steps:
