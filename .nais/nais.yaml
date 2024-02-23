@@ -18,6 +18,11 @@ spec:
     outbound:
       rules:
         - application: "{{mock.name}}"
+    inbound:
+      rules:
+        - application: "{{inbound.application.pensjon-pen.name}}"
+          namespace: "{{inbound.application.pensjon-pen.namespace}}"
+          cluster: "{{inbound.application.pensjon-pen.cluster}}"
   liveness:
     path: "/actuator/health/liveness"
     initialDelay: 10

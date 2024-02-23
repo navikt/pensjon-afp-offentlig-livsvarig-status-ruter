@@ -6,3 +6,9 @@ env:
   name: q2
 mock:
   name: pensjon-afp-offentlig-mock-q2
+inbound:
+  application:
+    pensjon-pen:
+      name: pensjon-pen-q2
+      namespace: pensjon-q2
+      cluster: dev-fss
