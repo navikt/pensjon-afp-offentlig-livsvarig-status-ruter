@@ -36,3 +36,6 @@ spec:
   env:
     - name: "SPRING_PROFILES_ACTIVE"
       value: "{{env.name}}"
+  azure:
+    application:
+      enabled: true
