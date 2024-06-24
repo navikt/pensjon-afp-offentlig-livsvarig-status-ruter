@@ -5,37 +5,40 @@ import java.time.LocalDate
 
 @Service
 class AfpOffentligLivsvarigService(
-    private val sisteOrdningClient: SisteOrdningClient,
     private val clientMap: Map<Int, AfpOffentligLivsvarigClient>,
 ) {
-    suspend fun hentAfpOffentligLivsvarigStatus(xRequestId: String, fnr: String, onsketVirkningtidspunkt: LocalDate): HentStatusResponse {
-        val sisteOrdning: Int? = sisteOrdningClient.soekSisteOrdning(xRequestId = xRequestId, fnr = fnr)
-
-        return if (sisteOrdning != null) {
-            val client = clientMap[sisteOrdning]
+    suspend fun hentAfpOffentligLivsvarigStatus(xRequestId: String, fnr: String, tpNr: Set<Int>, onsketVirkningtidspunkt: LocalDate): HentStatusResponse {
+        return tpNr.map { tpNr ->
+            val client = clientMap[tpNr]
             if (client != null) {
                 val hentAfpStatus = client
                     .hentAfpStatus(
                         xRequestId = xRequestId,
                         fnr = fnr,
                         uttaksdato = onsketVirkningtidspunkt,
-                        tpnummer = sisteOrdning,
+                        tpnummer = tpNr,
                     )
 
                 when (hentAfpStatus.statusAfp) {
                     "SOKT" -> return HentStatusResponse(
                         soknad = SoknadDto(
-                            hentAfpStatus.virkningsdato ?: throw IllegalArgumentException("Svar fra ordning mangler 'virkningsdato' for afp offentlig søknad"),
-                            tpNummer = hentAfpStatus.tpId?.toInt() ?: throw IllegalArgumentException("Svar fra ordning mangler 'tpId' for afp offentlig søknad"),
+                            hentAfpStatus.virkningsdato
+                                ?: throw IllegalArgumentException("Svar fra ordning mangler 'virkningsdato' for afp offentlig søknad"),
+                            tpNummer = hentAfpStatus.tpId?.toInt()
+                                ?: throw IllegalArgumentException("Svar fra ordning mangler 'tpId' for afp offentlig søknad"),
                         ),
                     )
 
                     "INNVILGET" -> return HentStatusResponse(
                         innvilget = InnvilgetDto(
-                            belop = hentAfpStatus.belop ?: throw IllegalArgumentException("Svar fra ordning mangler 'belop' for innvilget afp offentlig"),
-                            tpNummer = hentAfpStatus.tpId?.toInt() ?: throw IllegalArgumentException("Svar fra ordning mangler 'tpId' for innvilget afp offentlig") ,
-                            startdato = hentAfpStatus.virkningsdato ?: throw IllegalArgumentException("Svar fra ordning mangler 'virkningsdato' for innvilget afp offentlig"),
-                            sistRegulert = hentAfpStatus.datoSistRegulert ?: throw IllegalArgumentException("Svar fra ordning mangler 'datoSistRegulert' for innvilget afp offentlig"),
+                            belop = hentAfpStatus.belop
+                                ?: throw IllegalArgumentException("Svar fra ordning mangler 'belop' for innvilget afp offentlig"),
+                            tpNummer = hentAfpStatus.tpId?.toInt()
+                                ?: throw IllegalArgumentException("Svar fra ordning mangler 'tpId' for innvilget afp offentlig"),
+                            startdato = hentAfpStatus.virkningsdato
+                                ?: throw IllegalArgumentException("Svar fra ordning mangler 'virkningsdato' for innvilget afp offentlig"),
+                            sistRegulert = hentAfpStatus.datoSistRegulert
+                                ?: throw IllegalArgumentException("Svar fra ordning mangler 'datoSistRegulert' for innvilget afp offentlig"),
                         )
                     )
 
@@ -45,14 +48,15 @@ class AfpOffentligLivsvarigService(
             } else {
                 HentStatusResponse(
                     manglendeApi = ManglendeApiDto(
-                        tpNummer = sisteOrdning,
+                        tpNummer = tpNr,
                     ),
                 )
             }
-        } else {
-            HentStatusResponse(
-                manglerSisteOrdning = ManglerSisteOrdningDto()
-            )
+        }.run {
+            firstOrNull { it.innvilget != null }
+                ?: firstOrNull { it.soknad != null }
+                ?: firstOrNull { it.manglendeApi != null }
+                ?: first()
         }
     }
 
@@ -60,7 +64,6 @@ class AfpOffentligLivsvarigService(
         val innvilget: InnvilgetDto? = null,
         val soknad: SoknadDto? = null,
         val manglendeApi: ManglendeApiDto? = null,
-        val manglerSisteOrdning: ManglerSisteOrdningDto? = null,
     )
 
 
@@ -80,7 +83,5 @@ class AfpOffentligLivsvarigService(
     class ManglendeApiDto(
         val tpNummer: Int,
     )
-
-    class ManglerSisteOrdningDto
 }
 
